@@ -1,0 +1,138 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('ukiyo-api:server');
+var http = require('http');
+var os = require('os')
+var C = require('../utils/color-console')
+var pool = require('../db/dbConnect')
+
+function getIPAdress() {
+  var IPv4;
+  try {
+    IPv4 = os.networkInterfaces()['以太网'][0].address
+  } catch(e) { 
+    IPv4 = ''
+  }
+  return IPv4
+}
+
+function welcomeTip() {
+  var ip = getIPAdress()
+  // console.log('\033[40;30m  \033[41;30m  \033[42;30m  \033[43;30m  \033[44;30m  \033[45;30m  \033[46;30m  \033[47;30m  ');
+  console.log(`${C(30,42)} DONE ${C(32,40)} Express服务成功启动！${C(0)}\n`);
+  console.log(`  ${C(37)}- Local: ${C(34)}http://127.0.0.1:${port}${C(0)}`);
+  if(ip) {
+    console.log(`  ${C(37)}- Network: ${C(34)}http://${ip}:${port}${C(0)}`);
+  }
+  var apiList = `\n接口列表：\n
+  -${C(30,44)} /genshin ${C(37)} \n
+    ${C(34)}/common_url ${C(32)}GET ${C(37)}获取常用Url数据
+      ${C(36)}params: {key?:string}\n
+    ${C(34)}/role ${C(33)}POST ${C(37)}分页查询角色信息
+      ${C(36)}body: {page:Page, name?:string, element?:number, area?:number, book?:number, week?:number, star?:number}\n
+    ${C(34)}/relation ${C(32)}GET ${C(37)}获取关系列表
+      ${C(36)}params: {type?: string}\n
+    ${C(34)}/weapon ${C(33)}POST ${C(37)}分页查询武器信息
+      ${C(36)}body: {page:Page, name?:string, star?:number, book?:number, week?:number}\n
+    ${C(34)}/item ${C(33)}POST ${C(37)}分页查询材料信息
+    ${C(34)}/book ${C(33)}POST ${C(37)}分页查询天赋书信息
+      ${C(36)}body: {page:Page, name?:string, star?:number}\n
+
+  ${C(35)}注:Page: object<{pageSize:number, pageNum:number}>${C(0)}
+  `
+  console.log(apiList);
+}
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+var server = http.createServer(app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port, () => {
+  welcomeTip()
+  pool.connect((err, client, done) => {
+    if(err) {
+      return console.log(`${C(30,41)} 远程PostgreSQL数据库连接出错!${err} ${C(37,40)}...\n${C(0)}`);
+    }
+    console.log(`${C(30,42)} 远程PostgreSQL数据库连接成功! ${C(37,40)}...\n${C(0)}`)
+  })
+});
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
