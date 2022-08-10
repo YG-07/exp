@@ -9,7 +9,18 @@ var debug = require('debug')('ukiyo-api:server');
 var http = require('http');
 var os = require('os')
 var C = require('../utils/color-console')
-var pool = require('../db/dbConnect')
+var connection = require('../db/dbConnect')
+
+function connectDB(obj) {
+  var pool = obj.pool
+  var name  = obj.name
+  pool.connect((err, client, done) => {
+    if(err) {
+      return console.log(`${C(30,41)} ${name}连接出错!${err} ${C(37,40)}...\n${C(0)}`);
+    }
+    console.log(`${C(30,42)} ${name}连接成功! ${C(37,40)}...\n${C(0)}`)
+  })
+}
 
 function getIPAdress() {
   var IPv4;
@@ -34,14 +45,15 @@ function welcomeTip() {
     ${C(34)}/common_url ${C(32)}GET ${C(37)}获取常用Url数据
       ${C(36)}params: {key?:string}\n
     ${C(34)}/role ${C(33)}POST ${C(37)}分页查询角色信息
-      ${C(36)}body: {page:Page, name?:string, element?:number, area?:number, book?:number, week?:number, star?:number}\n
+      ${C(36)}body: {page:Page, name?:string, element?:number, area?:number, book?:number, star?:number, weapon?:number}\n
     ${C(34)}/relation ${C(32)}GET ${C(37)}获取关系列表
       ${C(36)}params: {type?: string}\n
     ${C(34)}/weapon ${C(33)}POST ${C(37)}分页查询武器信息
-      ${C(36)}body: {page:Page, name?:string, star?:number, book?:number, week?:number}\n
+      ${C(36)}body: {page:Page, name?:string, weapon?:number, star?:number, item?:number, week?:number}\n
     ${C(34)}/item ${C(33)}POST ${C(37)}分页查询材料信息
+      ${C(36)}body: {page:Page, name?:string, star?:number, week?:number, item?:number}\n
     ${C(34)}/book ${C(33)}POST ${C(37)}分页查询天赋书信息
-      ${C(36)}body: {page:Page, name?:string, star?:number}\n
+      ${C(36)}body: {page:Page, name?:string, star?:number, week?:number, book?:number}\n
 
   ${C(35)}注:Page: object<{pageSize:number, pageNum:number}>${C(0)}
   `
@@ -67,12 +79,7 @@ var server = http.createServer(app);
 
 server.listen(port, () => {
   welcomeTip()
-  pool.connect((err, client, done) => {
-    if(err) {
-      return console.log(`${C(30,41)} 远程PostgreSQL数据库连接出错!${err} ${C(37,40)}...\n${C(0)}`);
-    }
-    console.log(`${C(30,42)} 远程PostgreSQL数据库连接成功! ${C(37,40)}...\n${C(0)}`)
-  })
+  connectDB(connection)
 });
 server.on('error', onError);
 server.on('listening', onListening);

@@ -10,10 +10,10 @@ function Page(page) {
   let pageSize = page.pageSize || 10 
   // LIMIT过滤条件
   m = (pageNum - 1) * pageSize
-  n = pageNum * pageSize
+  n = pageSize
   if (m < 0) { 
     m = 0
-    n = 10 
+    n = 9 
   }
   return { pageNum, pageSize, m, n }
 }

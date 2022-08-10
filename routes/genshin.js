@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var pool = require('../db/dbConnect')
+var { pool } = require('../db/dbConnect')
 var {
   getConstUrlInfo,
   getRoleInfo,

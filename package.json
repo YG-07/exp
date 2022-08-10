@@ -13,12 +13,16 @@
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
+    "mysql": "^2.18.1",
     "pg": "^8.7.3",
     "pug": "2.0.0-beta11",
     "sqlstring": "^2.3.3"
   },
   "bin": "./bin/www",
   "pkg": {
-    "assets": ["public/**/*", "views/**/*"]
+    "assets": [
+      "public/**/*",
+      "views/**/*"
+    ]
   }
 }
