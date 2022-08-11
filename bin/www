@@ -23,9 +23,19 @@ function connectDB(obj) {
 }
 
 function getIPAdress() {
-  var IPv4;
+  var IPv4 = '';
+  var net = os.networkInterfaces();
+  var netKey = Object.keys(net)
+  
   try {
-    IPv4 = os.networkInterfaces()['以太网'][0].address
+    for(var i = 0; i < netKey.length; ++i) {
+      if(net[netKey[i]]) {
+        var network = net[netKey[i]]
+        for(let j = 0; j < network.length; ++j) {
+          IPv4 += `  ${C(37)}- Network: ${C(34)}http://${network[j].address}:${port}${C(0)}\n`
+        }
+      }
+    }
   } catch(e) { 
     IPv4 = ''
   }
@@ -38,7 +48,8 @@ function welcomeTip() {
   console.log(`${C(30,42)} DONE ${C(32,40)} Express服务成功启动！${C(0)}\n`);
   console.log(`  ${C(37)}- Local: ${C(34)}http://127.0.0.1:${port}${C(0)}`);
   if(ip) {
-    console.log(`  ${C(37)}- Network: ${C(34)}http://${ip}:${port}${C(0)}`);
+    console.log('  所有可能的IP地址：');
+    console.log(ip);
   }
   var apiList = `\n接口列表：\n
   -${C(30,44)} /genshin ${C(37)} \n
